@@ -1,0 +1,75 @@
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+
+export interface Database {
+  public: {
+    Tables: {
+      profiles: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          email: string
+          full_name: string | null
+          avatar_url: string | null
+          subscription_tier: "free" | "plus" | "pro"
+          subscription_status: "active" | "trialing" | "past_due" | "canceled" | "incomplete" | null
+          subscription_end_date: string | null
+        }
+        Insert: {
+          id: string
+          created_at?: string
+          updated_at?: string
+          email: string
+          full_name?: string | null
+          avatar_url?: string | null
+          subscription_tier?: "free" | "plus" | "pro"
+          subscription_status?: "active" | "trialing" | "past_due" | "canceled" | "incomplete" | null
+          subscription_end_date?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          email?: string
+          full_name?: string | null
+          avatar_url?: string | null
+          subscription_tier?: "free" | "plus" | "pro"
+          subscription_status?: "active" | "trialing" | "past_due" | "canceled" | "incomplete" | null
+          subscription_end_date?: string | null
+        }
+      }
+      usage_logs: {
+        Row: {
+          id: string
+          created_at: string
+          user_id: string
+          feature: string
+          count: number
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          user_id: string
+          feature: string
+          count: number
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          user_id?: string
+          feature?: string
+          count?: number
+        }
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+  }
+}
