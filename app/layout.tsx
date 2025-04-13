@@ -5,6 +5,7 @@ import { Plus_Jakarta_Sans } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import Script from "next/script"
 import { DebugAuth } from "@/components/auth/debug-auth"
+import { AuthRedirectCheck } from "@/components/auth/auth-redirect-check"
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -27,6 +28,7 @@ export default function RootLayout({
       <head />
       <body className={`${plusJakartaSans.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <AuthRedirectCheck />
           {children}
           <DebugAuth />
         </ThemeProvider>

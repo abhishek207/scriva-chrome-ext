@@ -81,15 +81,23 @@ export function PhoneVerificationForm({ userId, onSkip, isRequired = false }: Ph
         .update({
           phone,
           is_phone_verified: true,
+          updated_at: new Date().toISOString(),
         })
         .eq("id", userId)
 
       if (updateError) {
         console.error("Error updating profile:", updateError)
+        setError("Failed to update profile. Please try again.")
+        return
       }
 
-      // Redirect to onboarding form
-      router.push("/auth/onboarding")
+      setMessage("Phone verified successfully! Redirecting...")
+
+      // Redirect to onboarding form after a short delay
+      setTimeout(() => {
+        router.push("/auth/onboarding")
+        router.refresh()
+      }, 1500)
     } catch (err) {
       setError("An unexpected error occurred")
       console.error(err)

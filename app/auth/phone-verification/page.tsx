@@ -15,6 +15,18 @@ export default async function PhoneVerificationPage() {
     redirect("/auth/sign-in")
   }
 
+  // Check if user has already verified their phone
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_phone_verified")
+    .eq("id", session.user.id)
+    .single()
+
+  // If phone is already verified, redirect to onboarding
+  if (profile?.is_phone_verified) {
+    redirect("/auth/onboarding")
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <Card className="w-full max-w-md">
