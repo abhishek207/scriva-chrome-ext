@@ -13,8 +13,8 @@ export async function middleware(req: NextRequest) {
   // Get the pathname from the URL
   const path = req.nextUrl.pathname
 
-  // If user is signed in and the current path is /auth/*, redirect to /dashboard
-  if (session && path.startsWith("/auth")) {
+  // If user is signed in
+  if (session) {
     // Check if user has completed onboarding
     const { data: profile } = await supabase
       .from("profiles")
@@ -22,25 +22,29 @@ export async function middleware(req: NextRequest) {
       .eq("id", session.user.id)
       .single()
 
-    // Determine where to redirect based on user's profile status
-    let redirectPath = "/dashboard"
+    // If on auth pages but should be redirected based on profile status
+    if (path.startsWith("/auth") && path !== "/auth/callback") {
+      if (!profile?.is_phone_verified && path !== "/auth/phone-verification") {
+        return NextResponse.redirect(new URL("/auth/phone-verification", req.url))
+      } else if (!profile?.has_completed_onboarding && path !== "/auth/onboarding" && profile?.is_phone_verified) {
+        return NextResponse.redirect(new URL("/auth/onboarding", req.url))
+      } else if (profile?.is_phone_verified && profile?.has_completed_onboarding) {
+        return NextResponse.redirect(new URL("/dashboard", req.url))
+      }
+    }
 
-    if (!profile?.is_phone_verified && path !== "/auth/phone-verification") {
-      redirectPath = "/auth/phone-verification"
-    } else if (!profile?.has_completed_onboarding && path !== "/auth/onboarding") {
-      redirectPath = "/auth/onboarding"
-    } else if (path.startsWith("/auth")) {
-      // Only redirect if they're on an auth page and have completed all steps
-      return NextResponse.redirect(new URL(redirectPath, req.url))
+    // If trying to access protected routes without completing required steps
+    if (path.startsWith("/dashboard")) {
+      if (!profile?.is_phone_verified) {
+        return NextResponse.redirect(new URL("/auth/phone-verification", req.url))
+      } else if (!profile?.has_completed_onboarding) {
+        return NextResponse.redirect(new URL("/auth/onboarding", req.url))
+      }
     }
   }
-
-  // If user is not signed in and the current path is not /auth/* or /, redirect to /auth/sign-in
-  if (!session && !path.startsWith("/auth") && path !== "/") {
-    const redirectUrl = req.nextUrl.clone()
-    redirectUrl.pathname = "/auth/sign-in"
-    redirectUrl.searchParams.set("redirectedFrom", path)
-    return NextResponse.redirect(redirectUrl)
+  // If user is not signed in and trying to access protected routes
+  else if (!session && !path.startsWith("/auth") && path !== "/" && !path.startsWith("/api")) {
+    return NextResponse.redirect(new URL("/auth/sign-in", req.url))
   }
 
   return res
@@ -54,8 +58,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public (public files)
-     * - / (home page)
      */
-    "/((?!_next/static|_next/image|favicon.ico|public|api).*)",
+    "/((?!_next/static|_next/image|favicon.ico|public).*)",
   ],
 }
