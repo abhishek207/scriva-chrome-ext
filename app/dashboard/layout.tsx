@@ -15,13 +15,26 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/auth/sign-in")
   }
 
+  // Get profile data without checking verification status
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
+
+  // If profile doesn't exist, create a basic one
+  if (!profile) {
+    await supabase.from("profiles").insert({
+      id: session.user.id,
+      email: session.user.email!,
+      full_name: session.user.user_metadata.full_name || session.user.user_metadata.name || "User",
+      subscription_tier: "free",
+      is_phone_verified: true,
+      has_completed_onboarding: true,
+    })
+  }
 
   const user = {
     id: session.user.id,
     email: session.user.email!,
-    fullName: profile?.full_name,
-    avatarUrl: profile?.avatar_url,
+    fullName: profile?.full_name || session.user.user_metadata.full_name || session.user.user_metadata.name || "User",
+    avatarUrl: profile?.avatar_url || session.user.user_metadata.avatar_url || session.user.user_metadata.picture,
   }
 
   return (

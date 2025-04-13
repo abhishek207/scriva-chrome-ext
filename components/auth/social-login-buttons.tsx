@@ -27,10 +27,12 @@ export function SocialLoginButtons() {
       })
 
       if (error) {
+        console.error("Google login error:", error.message)
         throw error
       }
     } catch (error) {
       console.error("Error logging in with Google:", error)
+      alert("Failed to login with Google. Please try again.")
     } finally {
       setIsGoogleLoading(false)
     }

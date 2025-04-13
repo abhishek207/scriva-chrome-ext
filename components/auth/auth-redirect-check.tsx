@@ -22,44 +22,13 @@ export function AuthRedirectCheck() {
         } = await supabase.auth.getSession()
 
         if (session) {
-          console.log("AuthRedirectCheck: User is authenticated", session.user.id)
-
-          // Check user profile
-          const { data: profile, error } = await supabase
-            .from("profiles")
-            .select("is_phone_verified, has_completed_onboarding")
-            .eq("id", session.user.id)
-            .single()
-
-          if (error) {
-            console.error("AuthRedirectCheck: Error fetching profile", error)
-            return
-          }
-
-          console.log("AuthRedirectCheck: User profile", profile)
-
-          // Determine where to redirect based on profile status
-          if (!profile.is_phone_verified && pathname !== "/auth/phone-verification") {
-            console.log("AuthRedirectCheck: Redirecting to phone verification")
-            router.push("/auth/phone-verification")
-            return
-          }
-
-          if (profile.is_phone_verified && !profile.has_completed_onboarding && pathname !== "/auth/onboarding") {
-            console.log("AuthRedirectCheck: Redirecting to onboarding")
-            router.push("/auth/onboarding")
-            return
-          }
-
-          if (
-            profile.is_phone_verified &&
-            profile.has_completed_onboarding &&
-            (pathname === "/" || (pathname.startsWith("/auth") && pathname !== "/auth/callback"))
-          ) {
-            console.log("AuthRedirectCheck: Redirecting to dashboard")
+          // SIMPLIFIED: If user is on auth pages or home page, redirect to dashboard
+          if (pathname === "/" || (pathname.startsWith("/auth") && pathname !== "/auth/callback")) {
             router.push("/dashboard")
-            return
           }
+        } else if (pathname.startsWith("/dashboard")) {
+          // If not authenticated and trying to access dashboard, redirect to sign in
+          router.push("/auth/sign-in")
         }
       } catch (error) {
         console.error("AuthRedirectCheck: Unexpected error", error)

@@ -39,8 +39,9 @@ export async function GET(request: NextRequest) {
               full_name: session.user.user_metadata.full_name || session.user.user_metadata.name,
               avatar_url: session.user.user_metadata.avatar_url || session.user.user_metadata.picture,
               subscription_tier: "free",
-              is_phone_verified: false,
-              has_completed_onboarding: false,
+              // SIMPLIFIED: Mark as verified and onboarded by default
+              is_phone_verified: true,
+              has_completed_onboarding: true,
             })
             .select()
             .single()
@@ -51,16 +52,20 @@ export async function GET(request: NextRequest) {
           }
 
           profile = newProfile
+        } else {
+          // Update existing profile to mark as verified and onboarded
+          await supabase
+            .from("profiles")
+            .update({
+              is_phone_verified: true,
+              has_completed_onboarding: true,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", session.user.id)
         }
 
-        // Determine where to redirect based on user's profile status
-        if (!profile.is_phone_verified) {
-          return NextResponse.redirect(`${baseUrl}/auth/phone-verification`)
-        } else if (!profile.has_completed_onboarding) {
-          return NextResponse.redirect(`${baseUrl}/auth/onboarding`)
-        } else {
-          return NextResponse.redirect(`${baseUrl}/dashboard`)
-        }
+        // Redirect to dashboard
+        return NextResponse.redirect(`${baseUrl}/dashboard`)
       }
     } catch (error) {
       console.error("Error exchanging code for session:", error)
