@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { Plus_Jakarta_Sans } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import Script from "next/script"
+import { DebugAuth } from "@/components/auth/debug-auth"
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className={`${plusJakartaSans.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           {children}
+          <DebugAuth />
         </ThemeProvider>
         <Script
           id="media-recorder-polyfill"

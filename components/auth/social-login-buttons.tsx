@@ -12,19 +12,15 @@ export function SocialLoginButtons() {
     try {
       setIsGoogleLoading(true)
 
-      // Get the current site URL (works in both development and production)
+      // Get the current site URL
       const siteUrl = window.location.origin
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
+          // Use the Supabase site URL for the redirect
+          // This should be configured in your Supabase dashboard
           redirectTo: `${siteUrl}/auth/callback`,
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-          // Important: Use PKCE flow instead of implicit flow
-          flowType: "pkce",
         },
       })
 

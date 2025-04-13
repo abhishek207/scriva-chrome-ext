@@ -17,28 +17,37 @@ export async function GET(request: NextRequest) {
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
     try {
-      const { data } = await supabase.auth.exchangeCodeForSession(code)
+      // Exchange the code for a session
+      await supabase.auth.exchangeCodeForSession(code)
 
-      if (data.user) {
-        // Check if user has verified phone number
+      // Get the session to check if the user is authenticated
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (session) {
+        // Check if user has verified phone number and completed onboarding
         const { data: profile } = await supabase
           .from("profiles")
           .select("is_phone_verified, has_completed_onboarding")
-          .eq("id", data.user.id)
+          .eq("id", session.user.id)
           .single()
 
+        // Determine where to redirect based on user's profile status
         if (!profile?.is_phone_verified) {
-          return NextResponse.redirect(new URL("/auth/phone-verification", baseUrl))
+          return NextResponse.redirect(`${baseUrl}/auth/phone-verification`)
         } else if (!profile?.has_completed_onboarding) {
-          return NextResponse.redirect(new URL("/auth/onboarding", baseUrl))
+          return NextResponse.redirect(`${baseUrl}/auth/onboarding`)
+        } else {
+          return NextResponse.redirect(`${baseUrl}/dashboard`)
         }
       }
     } catch (error) {
       console.error("Error exchanging code for session:", error)
-      return NextResponse.redirect(new URL("/auth/error", baseUrl))
+      return NextResponse.redirect(`${baseUrl}/auth/error`)
     }
   }
 
-  // URL to redirect to after sign in process completes
-  return NextResponse.redirect(new URL("/dashboard", baseUrl))
+  // If no code or session, redirect to sign-in
+  return NextResponse.redirect(`${baseUrl}/auth/sign-in`)
 }

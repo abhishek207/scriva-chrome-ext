@@ -1,17 +1,17 @@
 /**
- * Gets the site URL from environment variables or falls back to localhost in development
+ * Gets the site URL based on the environment
  */
 export function getSiteUrl(): string {
   // For server-side code
   if (typeof window === "undefined") {
-    // Use VERCEL_URL in production, or localhost in development
-    const vercelUrl = process.env.VERCEL_URL
-    if (vercelUrl) {
-      return `https://${vercelUrl}`
+    // In production, use the actual deployed URL if available
+    if (process.env.NEXT_PUBLIC_SITE_URL) {
+      return process.env.NEXT_PUBLIC_SITE_URL
     }
+    // Fallback to localhost for development
     return "http://localhost:3000"
   }
 
-  // For client-side code
+  // For client-side code, use the current origin
   return window.location.origin
 }
