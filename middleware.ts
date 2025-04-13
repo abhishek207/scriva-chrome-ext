@@ -13,15 +13,8 @@ export async function middleware(req: NextRequest) {
   // Get the pathname from the URL
   const path = req.nextUrl.pathname
 
-  // If user is signed in
-  if (session) {
-    // SIMPLIFIED FLOW: If user is on auth pages or home page, redirect to dashboard
-    if ((path === "/" || path.startsWith("/auth")) && path !== "/auth/callback") {
-      return NextResponse.redirect(new URL("/dashboard", req.url))
-    }
-  }
-  // If user is not signed in and trying to access protected routes
-  else if (!session && path.startsWith("/dashboard")) {
+  // Protected routes - redirect to login if not authenticated
+  if (path.startsWith("/dashboard") && !session) {
     return NextResponse.redirect(new URL("/auth/sign-in", req.url))
   }
 
@@ -36,7 +29,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public (public files)
+     * - auth/callback (auth callback route)
      */
-    "/((?!_next/static|_next/image|favicon.ico|public).*)",
+    "/((?!_next/static|_next/image|favicon.ico|public|auth/callback).*)",
   ],
 }

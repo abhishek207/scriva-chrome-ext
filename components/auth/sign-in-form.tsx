@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,35 +17,6 @@ export function SignInForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-
-  // Check if user is already signed in
-  useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (session) {
-        // Check if user has verified phone number and completed onboarding
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("is_phone_verified, has_completed_onboarding")
-          .eq("id", session.user.id)
-          .single()
-
-        // Redirect based on user's profile status
-        if (!profile?.is_phone_verified) {
-          router.push("/auth/phone-verification")
-        } else if (!profile?.has_completed_onboarding) {
-          router.push("/auth/onboarding")
-        } else {
-          router.push("/dashboard")
-        }
-      }
-    }
-
-    checkSession()
-  }, [router])
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,20 +35,8 @@ export function SignInForm() {
       }
 
       if (data.user) {
-        // Check if user has verified phone number
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("is_phone_verified, has_completed_onboarding")
-          .eq("id", data.user.id)
-          .single()
-
-        if (!profile?.is_phone_verified) {
-          router.push("/auth/phone-verification")
-        } else if (!profile?.has_completed_onboarding) {
-          router.push("/auth/onboarding")
-        } else {
-          router.push("/dashboard")
-        }
+        // Simply redirect to dashboard after successful login
+        router.push("/dashboard")
         router.refresh()
       }
     } catch (err) {

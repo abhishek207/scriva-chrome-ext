@@ -1,23 +1,18 @@
-import { Navbar } from "@/components/navbar"
-import { Hero } from "@/components/hero"
-import { Features } from "@/components/features"
-import { HowItWorks } from "@/components/how-it-works"
-import { Pricing } from "@/components/pricing"
-import { CTA } from "@/components/cta"
-import { Footer } from "@/components/footer"
+import { redirect } from "next/navigation"
+import { createServerSupabaseClient } from "@/lib/supabase-server"
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1">
-        <Hero />
-        <Features />
-        <HowItWorks />
-        <Pricing />
-        <CTA />
-      </main>
-      <Footer />
-    </div>
-  )
+export default async function HomePage() {
+  const supabase = createServerSupabaseClient()
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  // If user is logged in, redirect to dashboard
+  if (session) {
+    redirect("/dashboard")
+  }
+
+  // Otherwise, redirect to the landing page
+  redirect("/auth/sign-in")
 }

@@ -27,41 +27,19 @@ export async function GET(request: NextRequest) {
 
       if (session) {
         // Check if user profile exists
-        let { data: profile } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
+        const { data: profile } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
 
         // If profile doesn't exist, create it
         if (!profile) {
-          const { data: newProfile, error: insertError } = await supabase
-            .from("profiles")
-            .insert({
-              id: session.user.id,
-              email: session.user.email,
-              full_name: session.user.user_metadata.full_name || session.user.user_metadata.name,
-              avatar_url: session.user.user_metadata.avatar_url || session.user.user_metadata.picture,
-              subscription_tier: "free",
-              // SIMPLIFIED: Mark as verified and onboarded by default
-              is_phone_verified: true,
-              has_completed_onboarding: true,
-            })
-            .select()
-            .single()
-
-          if (insertError) {
-            console.error("Error creating profile:", insertError)
-            return NextResponse.redirect(`${baseUrl}/auth/error`)
-          }
-
-          profile = newProfile
-        } else {
-          // Update existing profile to mark as verified and onboarded
-          await supabase
-            .from("profiles")
-            .update({
-              is_phone_verified: true,
-              has_completed_onboarding: true,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", session.user.id)
+          await supabase.from("profiles").insert({
+            id: session.user.id,
+            email: session.user.email,
+            full_name: session.user.user_metadata.full_name || session.user.user_metadata.name,
+            avatar_url: session.user.user_metadata.avatar_url || session.user.user_metadata.picture,
+            subscription_tier: "free",
+            is_phone_verified: true,
+            has_completed_onboarding: true,
+          })
         }
 
         // Redirect to dashboard

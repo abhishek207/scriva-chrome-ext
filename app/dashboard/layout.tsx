@@ -15,7 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/auth/sign-in")
   }
 
-  // Get profile data without checking verification status
+  // Get profile data
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
 
   // If profile doesn't exist, create a basic one
