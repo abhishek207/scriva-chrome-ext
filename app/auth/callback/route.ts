@@ -9,6 +9,9 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
 
+  // Get the base URL from the request
+  const baseUrl = requestUrl.origin
+
   if (code) {
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
@@ -25,17 +28,17 @@ export async function GET(request: NextRequest) {
           .single()
 
         if (!profile?.is_phone_verified) {
-          return NextResponse.redirect(new URL("/auth/phone-verification", request.url))
+          return NextResponse.redirect(new URL("/auth/phone-verification", baseUrl))
         } else if (!profile?.has_completed_onboarding) {
-          return NextResponse.redirect(new URL("/auth/onboarding", request.url))
+          return NextResponse.redirect(new URL("/auth/onboarding", baseUrl))
         }
       }
     } catch (error) {
       console.error("Error exchanging code for session:", error)
-      return NextResponse.redirect(new URL("/auth/error", request.url))
+      return NextResponse.redirect(new URL("/auth/error", baseUrl))
     }
   }
 
   // URL to redirect to after sign in process completes
-  return NextResponse.redirect(new URL("/dashboard", request.url))
+  return NextResponse.redirect(new URL("/dashboard", baseUrl))
 }

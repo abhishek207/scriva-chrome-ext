@@ -14,6 +14,7 @@ export default function SignInPage() {
               width={80}
               height={80}
               className="w-20 h-20 object-contain"
+              priority
             />
           </div>
           <CardTitle className="text-2xl">Sign in to your account</CardTitle>

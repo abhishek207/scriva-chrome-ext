@@ -26,6 +26,7 @@ export default async function PhoneVerificationPage() {
               width={80}
               height={80}
               className="w-20 h-20 object-contain"
+              priority
             />
           </div>
           <CardTitle className="text-2xl">Verify Your Phone</CardTitle>
